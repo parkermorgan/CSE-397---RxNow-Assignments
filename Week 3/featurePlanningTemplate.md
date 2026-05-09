@@ -12,9 +12,9 @@ Put it in the <artifacts/<team>/project/engineering/detaileddesign directory
 
 ### Reference Information (10 pts)
 ---
-* **Feature Title**:
-* **Feature Number**: 
-* **Date**: 
+* **Feature Title**: User Account Creation and Authentication
+* **Feature Number**: PF1
+* **Date**:  05/09/2026
 * **Author**: 
 * **Team Members**: 
 
@@ -22,7 +22,7 @@ Put it in the <artifacts/<team>/project/engineering/detaileddesign directory
 -- | --
 | Product Owner | |
 | Scrum Master | |
-| Tech Lead (Front-End) | |
+| Tech Lead (Front-End) | Parker Morgan |
 | Tech Lead (Back-End) | |
 | Tech Lead (Database) | |
 | Quality Assurance | | 
@@ -66,10 +66,29 @@ Detailed Design
 -->
 ### FrontEnd (20 pts)
 **Workflow Description**: <!-- Use paragraph and https://mermaid.js.org/syntax/sequenceDiagram.html-->
+The user initiates the authentication process by entering credentials into the `AuthComponent`. The `AuthController` captures this data and performs client-side validation to ensure the password meets the complexity requirements defined in the system security policies. Once validated, the `AuthService` (Back Interface) dispatches an asynchronous POST request to the API. Upon a successful authentication, the system stores the JWT token, updates the `UserAccount` model state, and redirects the user to the application dashboard.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant V as AuthView
+    participant C as AuthControl
+    participant S as AuthService
+    participant B as Backend API
+
+    U->>V: Enters Credentials
+    V->>C: handleLogin(data)
+    C->>C: validatePasswordRequirements()
+    C->>S: postAuthentication(payload)
+    S->>B: POST /api/auth/login
+    B-->>S: 200 OK (JWT Token)
+    S-->>C: resolveAuth(token)
+    C->>V: updateAppState(true)
+    V-->>U: Redirect to Dashboard
 - Agile Info:
-    - Story: 
-    - Est Story Points: 
-    - Assigned Responsible Engineer:
+    - Story: As a user, I want to create an account and log in securely so that my personal data is protected and accessible only to me.
+    - Est Story Points: 5
+    - Assigned Responsible Engineer: Parker Morgan
     - GitHub Issue Number: 
 
 <!-- See Role -->
@@ -78,30 +97,66 @@ Detailed Design
 * **Model**:
     * **UML Class**:
         <!-- Use https://mermaid.js.org/syntax/classDiagram.html: --->
-    * ***Code Location***: 
+        classDiagram
+            class UserAccount {
+                +String email
+                +String passwordHash
+                +Boolean isAuthenticated
+                +String sessionToken
+                +serialize()
+            }
+    * ***Code Location***: `src/models/UserAccount.js`
 * **Control** 
     * **UML Class**:
         <!-- Use https://mermaid.js.org/syntax/classDiagram.html: --->
-        * **Create** (Function name):
-        * **Read** (Function name):
-        * **Update** (Function name):
-        * **Delete** (Function name):
-        * ***Code Location***: 
+        ```mermaid
+        classDiagram
+            class AuthController {
+                +processSignup(data)
+                +processLogin(creds)
+                +processReset(email)
+                +processLogout()
+                -validateForm(data)
+            }
+        ```
+        * **Create** (Function name): `processSignup`
+        * **Read** (Function name): `processLogin`
+        * **Update** (Function name): `processReset`
+        * **Delete** (Function name): `processLogout`
+        * ***Code Location***: `src/controllers/AuthController.js`
 
 * **View** (UML Class)
     <!--- Use https://mermaid.js.org/syntax/classDiagram.html: --->
-    * **User Interface (Wireframe)**:
-        * **Create** (Function name):
-        * **Read** (Function name):
-        * **Update** (Function name):
-        * **Delete** (Function name):
-        * ***Code Location***: 
-    * **Back Interface** (UML Class):
-        * **Create** (Function name):
-        * **Read** (Function name):
-        * **Update** (Function name):
-        * **Delete** (Function name):
-        * ***Code Location***: 
+    ```mermaid
+    classDiagram
+        class AuthComponent {
+            +renderSignupForm()
+            +renderLoginForm()
+            +renderResetForm()
+            +destroySessionUI()
+            -toggleLoader()
+        }
+* **User Interface (Wireframe)**:
+    * **Create** (Function name): `renderSignupForm`
+    * **Read** (Function name): `renderLoginForm`
+    * **Update** (Function name): `renderResetForm`
+    * **Delete** (Function name): `destroySessionUI`
+    * ***Code Location***: `src/views/AuthComponent.jsx`
+* **Back Interface** (UML Class):
+    ```mermaid
+    classDiagram
+        class AuthService {
+            +apiPostUser(payload)
+            +apiGetAuth(payload)
+            +apiPatchPassword(payload)
+            +apiDeleteSession()
+        }
+    ```
+    * **Create** (Function name): `apiPostUser`
+    * **Read** (Function name): `apiGetAuth`
+    * **Update** (Function name): `apiPatchPassword`
+    * **Delete** (Function name): `apiDeleteSession`
+    * ***Code Location***: `src/services/AuthService.js`
 
 ### Back-End (20 pts)
 * **Business Logic**: 
